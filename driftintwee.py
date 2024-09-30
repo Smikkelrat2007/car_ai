@@ -6,26 +6,32 @@ import random
 import os
 import glob
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+RED = (255, 0, 0, 255)
+WHITE = (255, 255, 255, 255)
+BLACK = (0, 0, 0, 255)
 
+MAX_FPS = 60
+
+SKIPPING_FACTOR = 5
+TURN_RIGHT = 1
+TURN_LEFT = -1
 
 track_info_dictionary = {"untitled-2.png":[200, 100, 90],"track.png":[400, 300, 90],"track2.png":[200, 100, 90],"lukeenbastrack.png": [500, 500, 270]} #"track_naam.png":[spawn_positie_x, spawn_positie_y, spawn_hoek]
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def krijg_alle_tracks_in_directory():
     directory_python_file = os.path.dirname(os.path.abspath(__file__))
     image_files = glob.glob(os.path.join(directory_python_file, '*.*'))
     return [os.path.basename(file) for file in image_files if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
 
-def absolute_waarde(value):
-    return abs(value)
-
 def spawn_rays(ray_angles, a, x, y, skipping_factor, background_image):
     length_list = []
-    for angle in ray_angles:
-        if isinstance(angle, list):
-            length_list.extend(spawn_rays(angle, ray_angle, length_list[-1][1][0], length_list[-1][1][1], skipping_factor, background_image))
+    for ray_angle in ray_angles:
+        if isinstance(ray_angle, list):
+            length_list.extend(spawn_rays(ray_angle, a, length_list[-1][1][0], length_list[-1][1][1], skipping_factor, background_image))
         else:
-            ray_angle = angle + a
+            ray_angle = ray_angle + a
             ray = Ray(x, y, ray_angle, skipping_factor, background_image)
             ray.start()
             while not ray.check_intersect():
@@ -33,7 +39,7 @@ def spawn_rays(ray_angles, a, x, y, skipping_factor, background_image):
             length_list.append([ray.get_length(), ray.get_position()])
     return length_list
 
-def position_mask(x, y, dictionary, i, background_image, screen_width, screen_height):
+def position_mask(x, y, dictionary, i, background_image, screen_width, screen_height, screen):
     queue = deque([(x, y, i)])
     visited = set([(x, y)])
     highest_value = 0
@@ -141,7 +147,7 @@ class Auto:
                 else:
                     self.force_f = self.acceleration * self.backwards_driving_factor * self.speed_factor
         if self.speed != 0:
-            self.speed_modifier = min(1, self.hoe_sneller_je_gaat_hoe_slomer_je_stuurt / absolute_waarde(self.speed))
+            self.speed_modifier = min(1, self.hoe_sneller_je_gaat_hoe_slomer_je_stuurt / abs(self.speed))
         self.angle += self.left_right * self.steering_factor * self.speed_modifier * self.speed_factor
         self.speed += self.force_f
         self.speed_x = self.speed * math.sin(math.radians(self.angle))
@@ -173,7 +179,7 @@ class Auto:
             cars.remove(self)
 
     def spawn_rays(self, background_image):
-        return spawn_rays(self.ray_angles, self.angle, self.position_x, self.position_y, 5, background_image)
+        return spawn_rays(self.ray_angles, self.angle, self.position_x, self.position_y, SKIPPING_FACTOR, background_image)
 
 def create_player_car(arrows_or_wasd, dictionary, spawn_x, spawn_y, spawn_rotation):
     return Auto(spawn_rotation, spawn_x, spawn_y, 0, 0, (255, 255, 200), 20, 40, 0.2, 1, 4, 10, 2,0.5,[], player=True, rays=False, wasd=(arrows_or_wasd == 2), arrows=(arrows_or_wasd == 1), dictionary=dictionary)
@@ -190,18 +196,19 @@ def load_track(screen_width, screen_height, track_info_dictionary):
     background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
     sys.setrecursionlimit(screen_width * screen_height)
-    dictionary, farthest_point_on_track = position_mask(track_info_dictionary[random_track_naam][0], track_info_dictionary[random_track_naam][1], {}, 0, background_image, screen_width, screen_height)
+    dictionary, farthest_point_on_track = position_mask(track_info_dictionary[random_track_naam][0], track_info_dictionary[random_track_naam][1], {}, 0, background_image, screen_width, screen_height, screen)
     spawn_x, spawn_y, spawn_rotation = track_info_dictionary[random_track_naam][0], track_info_dictionary[random_track_naam][1], track_info_dictionary[random_track_naam][2]
     return background_image, dictionary, farthest_point_on_track, spawn_x, spawn_y, spawn_rotation
 
 
-def next_frame(background_image):
+def next_frame(background_image, screen):
     pygame.display.flip()
     pygame.time.Clock().tick(MAX_FPS)
     screen.blit(background_image, (0, 0))
     return background_image
 
-def run_cars(cars, background_image):
+def run_cars(cars, background_image, screen):
+
     for car in cars:
         if car.left_right != 0 or car.acceleration != 0:
             car.mechanica_bijwerken()
@@ -235,18 +242,13 @@ def left_over_inputs(event, cars, dictionary, spawn_x, spawn_y, spawn_rotation):
             cars.append(create_test_car(dictionary, spawn_x, spawn_y, spawn_rotation))
     return cars
 
-RED = (255, 0, 0, 255)
-WHITE = (255, 255, 255, 255)
-BLACK = (0, 0, 0, 255)
-
-MAX_FPS = 60
 screen_width = 1200
 screen_height = 800
 
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 
-def game(screen_width, screen_height):
+def game(screen_width, screen_height, screen):
     background_image, dictionary, farthest_point_on_track, spawn_x, spawn_y, spawn_rotation = load_track(screen_width, screen_height, track_info_dictionary)
 
     cars = []
@@ -263,12 +265,12 @@ def game(screen_width, screen_height):
             if event.type == pygame.QUIT:
                 running = False
 
-        background_image = next_frame(background_image)
-        cars = run_cars(cars, background_image)
+        background_image = next_frame(background_image, screen)
+        cars = run_cars(cars, background_image, screen)
 
         # If no player cars exist, create one at the spawn position
         
 
-game(screen_width, screen_height)
+game(screen_width, screen_height, screen)
 pygame.quit()
 
