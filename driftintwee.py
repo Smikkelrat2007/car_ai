@@ -13,8 +13,7 @@ BLACK = (0, 0, 0, 255)
 MAX_FPS = 60
 
 SKIPPING_FACTOR = 5
-TURN_RIGHT = 1
-TURN_LEFT = -1
+
 
 track_info_dictionary = {"untitled-2.png":[200, 100, 90],"track.png":[400, 300, 90],"track2.png":[200, 100, 90],"lukeenbastrack.png": [500, 500, 270]} #"track_naam.png":[spawn_positie_x, spawn_positie_y, spawn_hoek]
 
@@ -163,16 +162,11 @@ class Auto:
         rotated_surf = pygame.transform.rotate(self.rect_surf, self.angle)
         rotated_rect = rotated_surf.get_rect(center=(self.position_x, self.position_y))
         screen.blit(rotated_surf, rotated_rect.topleft)
-
-    def verwerk_inputs_wasd(self):
+    
+    def verwerk_inputs(self, vooruit, achteruit, links, rechts):
         self.keys = pygame.key.get_pressed()
-        self.left_right = 1 if self.keys[pygame.K_a] else -1 if self.keys[pygame.K_d] else 0
-        self.acceleration = 1 if self.keys[pygame.K_w] else -1 if self.keys[pygame.K_s] else 0
-
-    def verwerk_inputs_arrows(self):
-        self.keys = pygame.key.get_pressed()
-        self.left_right = 1 if self.keys[pygame.K_LEFT] else -1 if self.keys[pygame.K_RIGHT] else 0
-        self.acceleration = 1 if self.keys[pygame.K_UP] else -1 if self.keys[pygame.K_DOWN] else 0
+        self.left_right = 1 if self.keys[links] else -1 if self.keys[rechts] else 0
+        self.acceleration = 1 if self.keys[vooruit] else -1 if self.keys[achteruit] else 0
 
     def out_of_bounds(self, cars, background_image):
         if self.position_x < 0 or self.position_x > screen_width or self.position_y < 0 or self.position_y > screen_height or background_image.get_at((round(self.position_x), round(self.position_y))) == WHITE:
@@ -216,9 +210,9 @@ def run_cars(cars, background_image, screen):
         car.print_auto(screen)
         if car.player:
             if car.wasd:
-                car.verwerk_inputs_wasd()
+                car.verwerk_inputs(pygame.K_w,pygame.K_s,pygame.K_a,pygame.K_d)
             if car.arrows:
-                car.verwerk_inputs_arrows()
+                car.verwerk_inputs(pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT)
         car.out_of_bounds(cars, background_image)
         if car.rays:
             car.spawn_rays(background_image)
