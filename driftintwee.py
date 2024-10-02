@@ -176,7 +176,7 @@ class Auto:
         return spawn_rays(self.ray_angles, self.angle, self.position_x, self.position_y, SKIPPING_FACTOR, background_image)
 
 def create_player_car(arrows_or_wasd, dictionary, spawn_x, spawn_y, spawn_rotation):
-    return Auto(spawn_rotation, spawn_x, spawn_y, 0, 0, (255, 255, 200), 20, 40, 0.2, 1, 4, 10, 2,0.5,[], player=True, rays=False, wasd=(arrows_or_wasd == 2), arrows=(arrows_or_wasd == 1), dictionary=dictionary)
+    return Auto(spawn_rotation, spawn_x, spawn_y, 0, 0, (255, 255, 200), 20, 40, 0.2, 1, 4, 15, 2,0.5,[], player=True, rays=False, wasd=(arrows_or_wasd == 2), arrows=(arrows_or_wasd == 1), dictionary=dictionary)
 
 def create_test_car(dictionary, spawn_x, spawn_y, spawn_rotation):
     return Auto(spawn_rotation, spawn_x, spawn_y, 0, 0, (155, 0, 200), 20, 40, 0.2, 1, 4, 20, 2,0.5,[-90,-45,[-140,-130,-100,-90, 90, 100, 130, 140],-30,[-140,-130,-100,-90, 90, 100, 130, 140],-15,[-140,-130,-100,-90, 90, 100, 130, 140], 0, [-140,-130,-100,-90, 90, 100, 130, 140],15,[-140,-130,-100,-90, 90, 100, 130, 140], 90], player=True, rays=True, wasd=True, arrows=True, dictionary=dictionary)
@@ -267,4 +267,3 @@ def game(screen_width, screen_height, screen):
 
 game(screen_width, screen_height, screen)
 pygame.quit()
-
