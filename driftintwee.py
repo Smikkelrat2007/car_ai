@@ -15,14 +15,15 @@ MAX_FPS = 60
 SKIPPING_FACTOR = 5
 
 
-track_info_dictionary = { "luketrackss.png":[255,205,135]} #"track_naam.png":[spawn_positie_x, spawn_positie_y, spawn_hoek]              "goofyahhtrack.png":[200, 100, 90],"untitled-2.png":[200, 100, 90],"track.png":[400, 300, 90],"track2.png":[200, 100, 90],"lukeenbastrack.png": [500, 500, 270],"zeno.png":[200, 100, 90],
+track_info_dictionary = {"goofyahhtrack.png":[200, 100, 90],"untitled-2.png":[200, 100, 90],"track.png":[400, 300, 90],"track2.png":[200, 100, 90],"lukeenbastrack.png": [500, 500, 270],"zeno.png":[200, 100, 90], "luketrackss.png":[255,205,135]} #"track_naam.png":[spawn_positie_x, spawn_positie_y, spawn_hoek]              
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def krijg_alle_tracks_in_directory():
+    print("\n\n\n\n\n\n\n\n\n")
     directory_python_file = os.path.dirname(os.path.abspath(__file__))
     image_files = glob.glob(os.path.join(directory_python_file, '*.*'))
-    return [os.path.basename(file) for file in image_files if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
+    return [os.path.basename(file) for file in image_files if file.lower().endswith(('.png', '.jpg')) and os.path.basename(file) in track_info_dictionary]
 
 def spawn_rays(ray_angles, a, x, y, skipping_factor, background_image):
     length_list = []
