@@ -10,17 +10,15 @@ RED = (255, 0, 0, 255)
 WHITE = (255, 255, 255, 255)
 BLACK = (0, 0, 0, 255)
 
-MAX_FPS = 60
+MAX_FPS = 120
 
 SKIPPING_FACTOR = 5
-
 
 track_info_dictionary = {"goofyahhtrack.png":[200, 100, 90],"untitled-2.png":[200, 100, 90],"track.png":[400, 300, 90],"track2.png":[200, 100, 90],"lukeenbastrack.png": [500, 500, 270],"zeno.png":[200, 100, 90], "luketrackss.png":[255,205,135]} #"track_naam.png":[spawn_positie_x, spawn_positie_y, spawn_hoek]              
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def krijg_alle_tracks_in_directory():
-    print("\n\n\n\n\n\n\n\n\n")
     directory_python_file = os.path.dirname(os.path.abspath(__file__))
     image_files = glob.glob(os.path.join(directory_python_file, '*.*'))
     return [os.path.basename(file) for file in image_files if file.lower().endswith(('.png', '.jpg')) and os.path.basename(file) in track_info_dictionary]
@@ -195,7 +193,6 @@ def load_track(screen_width, screen_height, track_info_dictionary):
     spawn_x, spawn_y, spawn_rotation = track_info_dictionary[random_track_naam][0], track_info_dictionary[random_track_naam][1], track_info_dictionary[random_track_naam][2]
     return background_image, dictionary, farthest_point_on_track, spawn_x, spawn_y, spawn_rotation
 
-
 def next_frame(background_image, screen):
     pygame.display.flip()
     pygame.time.Clock().tick(MAX_FPS)
@@ -203,7 +200,6 @@ def next_frame(background_image, screen):
     return background_image
 
 def run_cars(cars, background_image, screen):
-
     for car in cars:
         if car.left_right != 0 or car.acceleration != 0:
             car.mechanica_bijwerken()
