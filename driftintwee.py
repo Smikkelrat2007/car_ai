@@ -10,7 +10,7 @@ RED = (255, 0, 0, 255)
 WHITE = (255, 255, 255, 255)
 BLACK = (0, 0, 0, 255)
 
-MAX_FPS = 120
+MAX_FPS = 60
 
 SKIPPING_FACTOR = 5
 
@@ -48,7 +48,6 @@ def position_mask(x, y, dictionary, i, background_image, screen_width, screen_he
         color_at_position = background_image.get_at((x, y))
         if color_at_position != BLACK:
             continue
-        dictionary[x, y] = current_value
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             new_x, new_y = x + dx, y + dy
             if 0 <= new_x < screen_width and 0 <= new_y < screen_height:
@@ -130,6 +129,8 @@ class Auto:
         self.brake_factor = brake_factor
         self.hoe_sneller_je_gaat_hoe_slomer_je_stuurt = hoe_sneller_je_gaat_hoe_slomer_je_stuurt
 
+        self.positie_op_de_baan = 0
+
     def mechanica_bijwerken(self):
         if self.friction != 0:
             self.force_f = -self.friction * self.speed ** 2
@@ -154,8 +155,8 @@ class Auto:
     def positie_bijwerken(self):
         self.position_x += self.speed_x
         self.position_y += self.speed_y
-        # if (round(self.position_x), round(self.position_y)) in self.dictionary:
-        #     print(self.dictionary[round(self.position_x), round(self.position_y)])
+        if (round(self.position_x), round(self.position_y)) in self.dictionary:
+            self.positie_op_baan = self.dictionary[round(self.position_x), round(self.position_y)]
 
     def print_auto(self, screen):
         rotated_surf = pygame.transform.rotate(self.rect_surf, self.angle)
@@ -189,6 +190,7 @@ def load_track(screen_width, screen_height, track_info_dictionary):
     background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
     sys.setrecursionlimit(screen_width * screen_height)
+    background_image = next_frame(background_image, screen)
     dictionary, farthest_point_on_track = position_mask(track_info_dictionary[random_track_naam][0], track_info_dictionary[random_track_naam][1], {}, 0, background_image, screen_width, screen_height, screen)
     spawn_x, spawn_y, spawn_rotation = track_info_dictionary[random_track_naam][0], track_info_dictionary[random_track_naam][1], track_info_dictionary[random_track_naam][2]
     return background_image, dictionary, farthest_point_on_track, spawn_x, spawn_y, spawn_rotation
@@ -201,6 +203,7 @@ def next_frame(background_image, screen):
 
 def run_cars(cars, background_image, screen):
     for car in cars:
+        print(car.positie_op_de_baan)
         if car.left_right != 0 or car.acceleration != 0:
             car.mechanica_bijwerken()
         car.positie_bijwerken()
@@ -214,6 +217,8 @@ def run_cars(cars, background_image, screen):
         if car.rays:
             car.spawn_rays(background_image)
     return cars
+
+
 
 def left_over_inputs(event, cars, dictionary, spawn_x, spawn_y, spawn_rotation):
     if event.key == pygame.K_l:
@@ -240,6 +245,7 @@ pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 def game(screen_width, screen_height, screen):
+    
     background_image, dictionary, farthest_point_on_track, spawn_x, spawn_y, spawn_rotation = load_track(screen_width, screen_height, track_info_dictionary)
 
     cars = []
@@ -261,6 +267,6 @@ def game(screen_width, screen_height, screen):
 
         # If no player cars exist, create one at the spawn position
         
-
-game(screen_width, screen_height, screen)
-pygame.quit()
+if __name__ == "__main__":
+    game(screen_width, screen_height, screen)
+    pygame.quit()
